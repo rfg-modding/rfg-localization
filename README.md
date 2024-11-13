@@ -5,3 +5,6 @@ A tool to convert .rfglocatext (localization string) files to and from JSON. Cre
 Localization string files can be found within the `misc.vpp_pc` file in your game root's `data` folder. Use [RfgUtil](https://github.com/Moneyl/RfgUtil) to unpack vpp_pc files.
 * To convert .rfglocatext to .json, run `rfg-localization.exe decode <input_path>`.
 * To convert .json back to .rfglocatext, run `rfg-localization.exe encode <input_path>`.
+
+## Credits
+* moneyl - [RfgTools++](https://github.com/rfg-modding/RfgToolsPlusPlus) LocalizationFile3 format
