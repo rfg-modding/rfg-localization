@@ -17,7 +17,7 @@ namespace LocalizationFile3
         public uint Length { get; internal set; }
 
         [JsonInclude]
-        public string Text { get; private set; } = string.Empty;
+        public string String { get; private set; } = string.Empty;
 
         public LocalizationEntry() { }
 
@@ -32,7 +32,7 @@ namespace LocalizationFile3
         {
             reader.BaseStream.Seek(Offset, SeekOrigin.Begin);
             byte[] stringBytes = reader.ReadBytes((int)Length);
-            Text = Encoding.Unicode.GetString(stringBytes).TrimEnd('\0');
+            String = Encoding.Unicode.GetString(stringBytes).TrimEnd('\0');
         }
     }
 
@@ -47,72 +47,67 @@ namespace LocalizationFile3
         public uint NumStrings { get; private set; }
 
         // Data
-        public List<LocalizationEntry> Entries { get; private set; } = new List<LocalizationEntry>();
+        public List<LocalizationEntry> Entries { get; private set; } = [];
 
         public void Read(BinaryReader reader)
         {
             ValidateHeader(reader);
 
-            // Read entry metadata
             for (int i = 0; i < NumStrings; i++)
             {
                 var entry = new LocalizationEntry(reader);
                 Entries.Add(entry);
             }
 
-            // Load entry strings
             foreach (var entry in Entries)
             {
                 entry.LoadString(reader);
             }
         }
 
-        // Write data back to .rfglocatext using list of LocalizationEntry3
+        // Write to .rfglocatext
         public static void Write(string filePath, List<LocalizationEntry> entries)
         {
-            using (var reader = new BinaryWriter(File.Open(filePath, FileMode.Create)))
+            using BinaryWriter reader = new(File.Open(filePath, FileMode.Create));
+            var localizationFile = new LocalizationFile
             {
-                var localizationFile = new LocalizationFile
-                {
-                    Signature = ExpectedSignature,
-                    Version = ExpectedVersion,
-                    NumStrings = (uint)entries.Count,
-                    Entries = entries
-                };
+                Signature = ExpectedSignature,
+                Version = ExpectedVersion,
+                NumStrings = (uint)entries.Count,
+                Entries = entries
+            };
 
-                // Write header
-                reader.Write(localizationFile.Signature);
-                reader.Write(localizationFile.Version);
-                reader.Write(localizationFile.NumStrings);
+            // Header
+            reader.Write(localizationFile.Signature);
+            reader.Write(localizationFile.Version);
+            reader.Write(localizationFile.NumStrings);
 
-                // Calculate entry offsets and lengths
-                uint offset = (uint)(12 + entries.Count * 12);
-                foreach (var entry in entries)
-                {
-                    entry.Offset = offset;
-                    entry.Length = (uint)Encoding.Unicode.GetByteCount(entry.Text + "\0");
-                    offset += entry.Length;
-                }
+            // Set entry offsets and lengths
+            uint offset = (uint)(12 + entries.Count * 12);
+            foreach (var entry in entries)
+            {
+                entry.Offset = offset;
+                entry.Length = (uint)Encoding.Unicode.GetByteCount(entry.String + "\0");
+                offset += entry.Length;
+            }
 
-                // Write entry metadata
-                foreach (var entry in entries)
-                {
-                    reader.Write(entry.KeyHash);
-                    reader.Write(entry.Offset);
-                    reader.Write(entry.Length);
-                }
+            // Entry metadata
+            foreach (var entry in entries)
+            {
+                reader.Write(entry.KeyHash);
+                reader.Write(entry.Offset);
+                reader.Write(entry.Length);
+            }
 
-                // Write entry text
-                foreach (var entry in entries)
-                {
-                    var textBytes = Encoding.Unicode.GetBytes(entry.Text + "\0");
-                    reader.Write(textBytes);
-                }
+            // Entry strings
+            foreach (var entry in entries)
+            {
+                var textBytes = Encoding.Unicode.GetBytes(entry.String + "\0");
+                reader.Write(textBytes);
             }
         }
 
-
-        private static readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions
+        private static readonly JsonSerializerOptions _jsonSerializerOptions = new()
         {
             WriteIndented = true,
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping

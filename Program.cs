@@ -38,14 +38,11 @@ namespace rfg_localization
 
             try
             {
-                using (var stream = File.OpenRead(filePath))
-                using (var reader = new BinaryReader(stream))
-                {
-                    var localizationFile = new LocalizationFile();
-                    localizationFile.Read(reader);
-                    localizationFile.ConvertToJson(Path.ChangeExtension(filePath, ".json"));
-
-                }
+                using var stream = File.OpenRead(filePath);
+                using var reader = new BinaryReader(stream);
+                var localizationFile = new LocalizationFile();
+                localizationFile.Read(reader);
+                localizationFile.ConvertToJson(Path.ChangeExtension(filePath, ".json"));
             }
             catch (Exception ex)
             {
