@@ -7,8 +7,10 @@ A tool made to decode, edit, and encode localization string files (`.rfglocatext
 - Recursive string identifier scraping from XTBL files.
 - Add completely new strings for in-game usage.
 
-## Usage
-Visit the [documentation page](https://github.io/rfg-modding/rfg-localization) for usage instructions.
-
 ## Credits
-* moneyl - [RfgTools++](https://github.com/rfg-modding/RfgToolsPlusPlus) LocalizationFile3 format
+- moneyl - [RfgTools++](https://github.com/rfg-modding/RfgToolsPlusPlus) LocalizationFile3 format
+
+## Continue reading
+- [Decoding](decoding.md)
+- [Editing](editing.md)
+- [Encoding](encoding.md)

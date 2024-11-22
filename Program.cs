@@ -15,7 +15,7 @@ namespace rfg_localization
                 new Argument<string>("input-path", "Path to a .rfglocatext file"),
                 new Option<string>(["-x", "--xtbl", "--load-xtbl"],
                     () => string.Empty,
-                    "Used for scraping identifiers. Requires path to unpacked misc and/or dlcp##_misc .vpp_pc files.")
+                    "Path to an unpacked misc and/or dlcp##_misc .vpp_pc directory. Used for recursively scraping and loading string identifiers for readability purposes. Visit docs for more info.")
                     { IsRequired = false }
             };
             decodeCommand.SetHandler(DecodeFile, (Argument<string>)decodeCommand.Arguments[0], (Option<string>)decodeCommand.Options[0]);
