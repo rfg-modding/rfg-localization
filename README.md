@@ -8,7 +8,7 @@ A tool made to decode, edit, and encode localization string files (`.rfglocatext
 - Add completely new strings for in-game usage.
 
 ## Usage
-Visit the [documentation page](https://github.io/rfg-modding/rfg-localization) for usage instructions.
+Visit the [documentation page](https://rfg-modding.github.io/rfg-localization) for usage instructions.
 
 ## Credits
 * moneyl - [RfgTools++](https://github.com/rfg-modding/RfgToolsPlusPlus) LocalizationFile3 format
