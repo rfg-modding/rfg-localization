@@ -1,11 +1,11 @@
-# RF:G Localization Editor
+# RF:G Localization Tool
 A tool made to decode, edit, and encode localization string files (`.rfglocatext`) for [Red Faction: Guerrilla Re-Mars-tered](https://www.redfactionwiki.com/wiki/Red_Faction:_Guerrilla).
 
 ## Features
-- Decode `.rfglocatext` files into JSON for easier editing.
-- Edit and re-encode localization strings back to the game's format.
+- Decode `.rfglocatext` files into XML for editing.
+- Re-encode localization strings back to the game's format.
 - Recursive string identifier scraping from XTBL files.
-- Add completely new strings for in-game usage.
+- Add new strings for in-game usage.
 
 ## Usage
 Visit the [documentation page](https://github.io/rfg-modding/rfg-localization) for usage instructions.

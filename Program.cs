@@ -1,43 +1,57 @@
-﻿using System.CommandLine;
+﻿using McMaster.Extensions.CommandLineUtils;
 using RFGM.Formats.Localization;
+using System.ComponentModel.DataAnnotations;
 
 namespace rfg_localization
 {
     internal class Program
     {
-        static async Task Main(string[] args)
+        [Argument(0, Name = "input", Description = "Path to .rfglocatext or .xml file")]
+        [Required]
+        public string Input { get; } = "";
+
+        [Option("-o|--output", Description = "Path to output file")]
+        public string Output { get; } = "";
+
+        [Option("-x|--xtbldir", Description = "Path to directory of unpacked misc and/or dlcp##_misc .vpp_pc files")]
+        public string XtblDir { get; } = "";
+
+        private void OnExecute()
         {
-            var rootCommand = new RootCommand("Localization file tool for Red Faction: Guerrilla Re-Mars-tered");
+            string fileExtension = Path.GetExtension(Input);
 
-            // Decode
-            var decodeCommand = new Command("decode", "Write a .rfglocatext file into JSON.")
+            if (fileExtension == ".rfglocatext") {
+                Console.WriteLine(".rfglocatext detected, decoding '{0}'", Input);
+                DecodeFile(Input, Output, XtblDir);
+            }
+            else if (fileExtension == ".xml")
             {
-                new Argument<string>("input-path", "Path to a .rfglocatext file"),
-                new Option<string>(["-x", "--xtbl", "--load-xtbl"],
-                    () => string.Empty,
-                    "Path to an unpacked misc and/or dlcp##_misc .vpp_pc directory. Used for recursively scraping and loading string identifiers for readability purposes. Visit docs for more info.")
-                    { IsRequired = false }
-            };
-            decodeCommand.SetHandler(DecodeFile, (Argument<string>)decodeCommand.Arguments[0], (Option<string>)decodeCommand.Options[0]);
-
-            // Encode
-            var encodeCommand = new Command("encode", "Write a JSON to a .rfglocatext file.")
+                Console.WriteLine(".xml detected, encoding '{0}'", Input);
+                EncodeFile(Input, Output);
+            }
+            else
             {
-                new Argument<string>("input-path", "Path to a JSON file"),
-            };
-            encodeCommand.SetHandler(EncodeFile, (Argument<string>)encodeCommand.Arguments[0]);
-
-            rootCommand.AddCommand(decodeCommand);
-            rootCommand.AddCommand(encodeCommand);
-
-            await rootCommand.InvokeAsync(args);
+                throw new ArgumentException($"Unrecognized file extension '{fileExtension}'");
+            }
         }
 
-        static void DecodeFile(string inputPath, string xtblPath)
+        static void Main(string[] args)
+        {
+            Console.WriteLine("rfg-localization 0.2.0");
+            Console.WriteLine("Localization tool for Red Faction: Guerrilla Re-Mars-tered.\n");
+            CommandLineApplication.Execute<Program>(args);
+        }
+
+        static void DecodeFile(string inputPath, string outputPath, string xtblPath)
         {
             if (!File.Exists(inputPath))
             {
                 throw new FileNotFoundException("File not found.", inputPath);
+            }
+
+            if (string.IsNullOrEmpty(outputPath))
+            {
+                outputPath = Path.ChangeExtension(inputPath, ".xml");
             }
 
             try
@@ -46,7 +60,7 @@ namespace rfg_localization
                 using var reader = new BinaryReader(stream);
                 var localizationFile = new LocalizationFile();
                 localizationFile.Read(reader, xtblPath);
-                localizationFile.ConvertToJson(Path.ChangeExtension(inputPath, ".json"));
+                localizationFile.ConvertToXml(outputPath);
             }
             catch (Exception ex)
             {
@@ -54,14 +68,18 @@ namespace rfg_localization
             }
         }
 
-        static void EncodeFile(string inputPath)
+        static void EncodeFile(string inputPath, string outputPath)
         {
             if (!File.Exists(inputPath))
             {
                 throw new FileNotFoundException("File not found.", inputPath);
             }
 
-            string outputPath = Path.ChangeExtension(inputPath, ".rfglocatext");
+            if (string.IsNullOrEmpty(outputPath))
+            {
+                outputPath = Path.ChangeExtension(inputPath, ".rfglocatext");
+            }
+
             string backupPath = Path.ChangeExtension(outputPath, ".rfglocatext.bak");
 
             if (File.Exists(outputPath))
@@ -75,7 +93,7 @@ namespace rfg_localization
 
             try
             {
-                LocalizationFile.ConvertFromJson(inputPath, outputPath);
+                LocalizationFile.ConvertFromXml(inputPath, outputPath);
             }
             catch (Exception ex) 
             {

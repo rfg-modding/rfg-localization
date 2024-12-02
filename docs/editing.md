@@ -1,13 +1,10 @@
 # Editing .rfglocatext files
-After [decoding](decoding.md) an `.rfglocatext` file, it becomes an editable JSON file.
+After [decoding](decoding.md) an `.rfglocatext` file, it becomes an editable XML file.
 
-## Modifying existing strings
-To modify an existing localization string, update the `String` field in the JSON file with the desired text.
+## Modifying existing entries
+To modify the string of an entry, update the respective `String` field with the desired text. 
 
-**Note:** When editing the JSON file, certain characters require escape sequences to be correctly formatted, for example:
-- Double quotes: `\"`
-- Newlines: `\\n`
-- White-space characters: `\\s`
+If desired, the Identifier of an existing entry can be updated and its Hash value will be re-calculated. It isn't recommended to modify the Identifier of a base game entry.
 
 ### Markup syntax
 Various markup codes can be used to modify text appearance or insert elements into strings. Each markup syntax code affects only the text written after it.
@@ -39,20 +36,17 @@ Below is a list of known supported markup codes:
 ## Adding new strings
 To add a new localization entry, use the following format:
 
-```json
-  {
-    "Identifier": "",
-    "String": ""
-  },
+```xml
+  <Entry>
+    <Identifier></Identifier>
+    <String></String>
+  </Entry>
 ```
 
 ### Best practices
 
-- Add new entries at the end of the JSON file to separate them from the base game entries.
-- Do not include the `Hash` field for new entries, as it will be calculated automatically when the file is encoded back into `.rfglocatext` format.
-- Write the new identifier into an XTBL file before encoding the JSON. 
+- Add new entries at the end of the file to separate them from the base game entries.
+- Do not include the `Hash` field for new entries, as it will be calculated automatically when the file is re-encoded.
+- Ensure that each identifier follows the standard naming convention.
 
-### Important notes
-
-- Ensure that each new identifier follows the correct naming convention.
-- For more details, refer to the [Decoding](decoding.md) page.
+For more details, refer to the [Decoding](decoding.md) page.
