@@ -20,21 +20,6 @@ namespace rfg_localization
         {
             string fileExtension = Path.GetExtension(Input);
 
-            //if (fileExtension == ".rfglocatext")
-            //{
-            //    Console.WriteLine(".rfglocatext detected, decoding '{0}'", Input);
-            //    DecodeFile(Input, Output, XtblDir);
-            //}
-            //else if (fileExtension == ".xml")
-            //{
-            //    Console.WriteLine(".xml detected, encoding '{0}'", Input);
-            //    EncodeFile(Input, Output);
-            //}
-            //else
-            //{
-            //    throw new ArgumentException($"Unrecognized file extension '{fileExtension}'");
-            //}
-
             switch (fileExtension)
             {
                 case ".rfglocatext":
