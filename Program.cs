@@ -20,25 +20,39 @@ namespace rfg_localization
         {
             string fileExtension = Path.GetExtension(Input);
 
-            if (fileExtension == ".rfglocatext") {
-                Console.WriteLine(".rfglocatext detected, decoding '{0}'", Input);
-                DecodeFile(Input, Output, XtblDir);
-            }
-            else if (fileExtension == ".xml")
+            //if (fileExtension == ".rfglocatext")
+            //{
+            //    Console.WriteLine(".rfglocatext detected, decoding '{0}'", Input);
+            //    DecodeFile(Input, Output, XtblDir);
+            //}
+            //else if (fileExtension == ".xml")
+            //{
+            //    Console.WriteLine(".xml detected, encoding '{0}'", Input);
+            //    EncodeFile(Input, Output);
+            //}
+            //else
+            //{
+            //    throw new ArgumentException($"Unrecognized file extension '{fileExtension}'");
+            //}
+
+            switch (fileExtension)
             {
-                Console.WriteLine(".xml detected, encoding '{0}'", Input);
-                EncodeFile(Input, Output);
-            }
-            else
-            {
-                throw new ArgumentException($"Unrecognized file extension '{fileExtension}'");
+                case ".rfglocatext":
+                    Console.WriteLine(".rfglocatext detected, decoding '{0}'", Input);
+                    DecodeFile(Input, Output, XtblDir);
+                    break;
+                case ".xml":
+                    Console.WriteLine(".xml detected, encoding '{0}'", Input);
+                    EncodeFile(Input, Output);
+                    break;
+                default:
+                    throw new ArgumentException($"Unrecognized file extension '{fileExtension}'");
             }
         }
 
         static void Main(string[] args)
         {
-            Console.WriteLine("rfg-localization 0.2.0");
-            Console.WriteLine("Localization tool for Red Faction: Guerrilla Re-Mars-tered.\n");
+            Console.WriteLine("rfg-localization 0.3.0\nLocalization tool for Red Faction: Guerrilla Re-Mars-tered.\n");
             CommandLineApplication.Execute<Program>(args);
         }
 
@@ -49,18 +63,17 @@ namespace rfg_localization
                 throw new FileNotFoundException("File not found.", inputPath);
             }
 
-            if (string.IsNullOrEmpty(outputPath))
-            {
-                outputPath = Path.ChangeExtension(inputPath, ".xml");
-            }
+            outputPath = string.IsNullOrEmpty(outputPath) ? Path.ChangeExtension(inputPath, ".xml") : outputPath;
 
             try
             {
-                using var stream = File.OpenRead(inputPath);
-                using var reader = new BinaryReader(stream);
                 var localizationFile = new LocalizationFile();
-                localizationFile.Read(reader, xtblPath);
-                localizationFile.ConvertToXml(outputPath);
+
+                using var readStream = File.OpenRead(inputPath);
+                localizationFile.Read(readStream, xtblPath);
+
+                using var saveStream = File.Create(outputPath);
+                localizationFile.WriteToXml(saveStream);
             }
             catch (Exception ex)
             {
@@ -68,17 +81,14 @@ namespace rfg_localization
             }
         }
 
-        static void EncodeFile(string inputPath, string outputPath)
+        static void EncodeFile(string xmlPath, string outputPath)
         {
-            if (!File.Exists(inputPath))
+            if (!File.Exists(xmlPath))
             {
-                throw new FileNotFoundException("File not found.", inputPath);
+                throw new FileNotFoundException("File not found.", xmlPath);
             }
 
-            if (string.IsNullOrEmpty(outputPath))
-            {
-                outputPath = Path.ChangeExtension(inputPath, ".rfglocatext");
-            }
+            outputPath = string.IsNullOrEmpty(outputPath) ? Path.ChangeExtension(xmlPath, ".rfglocatext") : outputPath;
 
             string backupPath = Path.ChangeExtension(outputPath, ".rfglocatext.bak");
 
@@ -93,9 +103,15 @@ namespace rfg_localization
 
             try
             {
-                LocalizationFile.ConvertFromXml(inputPath, outputPath);
+                LocalizationFile localizationFile = new();
+
+                using var readStream = File.OpenRead(xmlPath);
+                localizationFile.ReadFromXml(readStream);
+
+                using var saveStream = File.Create(outputPath);
+                localizationFile.Write(saveStream);
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 throw new Exception($"An error occurred while encoding the file: {ex.Message}", ex);
             }
